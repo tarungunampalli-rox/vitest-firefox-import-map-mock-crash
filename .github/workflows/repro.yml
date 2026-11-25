@@ -1,0 +1,38 @@
+name: repro
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  firefox:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        vitest: ['5.1.1', '5.0.5']
+        test: [with-mock, without-mock]
+    name: vitest ${{ matrix.vitest }} / ${{ matrix.test }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - if: matrix.vitest != '5.1.1'
+        run: npm install --no-save vitest@${{ matrix.vitest }} @vitest/browser-playwright@${{ matrix.vitest }}
+      - run: npx playwright install --with-deps firefox
+      - name: Run 20 times
+        run: |
+          crashes=0
+          for i in $(seq 1 20); do
+            npx vitest run ${{ matrix.test }}.test.ts > out.txt 2>&1 || true
+            if grep -q 'page crashed' out.txt; then
+              crashes=$((crashes + 1))
+              echo "run $i: crashed"
+            else
+              echo "run $i: ok"
+            fi
+          done
+          echo "vitest ${{ matrix.vitest }} / ${{ matrix.test }}: $crashes/20 crashed" >> "$GITHUB_STEP_SUMMARY"
+          echo "$crashes/20 crashed"
