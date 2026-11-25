@@ -1,11 +1,13 @@
 # Vitest 5.1 import-map `vi.mock` intermittently crashes Firefox
 
 ```sh
-npm ci
+npm install
 npx playwright install firefox
-./repro.sh 10                               # import-map mocks (default): some runs crash
-./repro.sh 10 --browser.importMapMocks=false # no crashes
+npx vitest run                                # import-map mocks (default): crashes in ~half of runs
+npx vitest run --browser.importMapMocks=false # crashes rarely (1/20 runs)
 ```
+
+The crash is intermittent, so run `npx vitest run` several times.
 
 A crashing run prints:
 
@@ -14,4 +16,4 @@ Error: The firefox page crashed while running tests. This can happen if the brow
 Serialized Error: { code: 'VITEST_BROWSER_CONNECTION_CLOSED' }
 ```
 
-`nomock.test.ts`-style files without `vi.mock` never crash, and 5.0.5 with the same test never crashes.
+Without `vi.mock`, or on Vitest 5.0.5 with the same test, it never crashed in 20 runs.
