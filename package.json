@@ -1,0 +1,14 @@
+{
+  "name": "ffrepro",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@vitest/browser-playwright": "^5.1.1",
+    "playwright": "^1.60.0",
+    "vitest": "^5.1.1"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "repro": "./repro.sh"
+  }
+}
